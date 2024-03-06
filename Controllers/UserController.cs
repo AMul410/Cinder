@@ -1,66 +1,98 @@
 ﻿using Cinder.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Cinder.Controllers
 {
+  // Route: localhost/user
   [Route("[controller]")]
   [ApiController]
-
-
   public class UserController : ControllerBase
   {
-    private List<User> users = new List<User>();
-
+    private List<User> users;
     public UserController()
     {
-      var user1 = new User("tobi", "abc123");
-      var user2 = new User("kevin", "def456");
-      var user3 = new User("alex", "xyz421");
-
-      users.Add(user1);
-      users.Add(user2);
-      users.Add(user3);
+      users = UserRepository.Instance.AllUsers;
     }
-
+    // GET all users
+    // Route: localhost/user
     [HttpGet]
-    public List<User> Get()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<List<User>> Get()
     {
-      return users;
+      if (users.Count == 0)
+      {
+        return NotFound();
+      }
+      return Ok(users);
     }
 
+    // GET user by id
+    // Route: localhost/user/5
     [HttpGet]
     [Route("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<User> Get(int id) 
+    public ActionResult<User> Get(int id)
     {
       var user = users.Find(user => user.Id == id);
       return user == null ? NotFound() : Ok(user);
     }
 
+    // POST create new user
+    // Route: localhost/user
     [HttpPost]
-    public User Post(string username, string password)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<User> Post([FromBody] User user)
     {
-      var user = new User(username, password);
-      return user;
+      users.Add(user);
+      return Ok(user);
     }
 
+    // PUT modify one user by id
+    [HttpPut]
+    [Route("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<User> Put(int id, [FromBody] User user)
+    {
+      try
+      {
+        // Get user by id
+        var userToModify = users.Find(users => users.Id == id);
+        // Modify user with user from http-request body
+        userToModify.Username = user.Username;
+        userToModify.Password = user.Password;
+        userToModify.IsVegan = user.IsVegan;
+        userToModify.Occupation = user.Occupation;
+        // return modified user
+        return Ok(userToModify);
+      }
+      catch
+      {
+        return NotFound();
+      }
+    }
+
+    // DELETE remove one user
+    // Route: localhost/user/5
     [HttpDelete]
-    public void Delete(int id)
+    [Route("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<User> Delete(int id)
     {
       try
       {
         var user = users.Find(user => user.Id == id);
         users.Remove(user);
+        return Ok(user);
       }
-      catch      
+      catch
       {
-        return;
+        return NotFound();
       }
-   }
-
-
+    }
   }
 }
