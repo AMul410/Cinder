@@ -1,6 +1,19 @@
+using Cinder;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// Get conneciton string for CinderDB
+var connectionString = builder.Configuration.GetConnectionString("CinderDB");
+
 // Add services to the container.
+// Add service for entity framework
+builder.Services.AddDbContext<UserContext>(
+    options => options.UseMySql(
+      connectionString,
+      ServerVersion.AutoDetect(connectionString)
+    )
+);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
