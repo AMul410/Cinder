@@ -16,9 +16,14 @@ namespace Cinder.Controllers
       _context = context;
 
     }
-    // GET all users
-    // Route: localhost/user
-    [HttpGet]
+        /// <summary> 
+        /// Returns a list of all Users
+        /// </summary>
+        /// <returns></returns>
+
+        // GET all users
+        // Route: localhost/user
+        [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<User>>> Get()
